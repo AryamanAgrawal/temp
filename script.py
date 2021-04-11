@@ -86,34 +86,46 @@ def main():
             entry_datetime = ref_row['datetime']
             exit_datetime = ref_row['exit_signal_datetime']
             strike_ref = str(ref_row['strike'])
+            target1 = float(ref_row['spot_target_1'])
+            target2 = float(ref_row['spot_target_2'])
 
             df_spot_temp = df_spot.loc[(
                 df_spot['datetime'] >= ref_row['datetime']) & (df_spot['datetime'] <= ref_row['exit_signal_datetime'])]
+            option_type = str(ref_row['option_type'])
+
+            df_spot_temp.to_csv(r'./test_res2.csv', mode='a')
 
             # Finding target datetime against spot
             for index, spot_row in df_spot_temp.iterrows():
 
                 high = float(spot_row['high'])
                 low = float(spot_row['low'])
-                option_type = str(ref_row['option_type'])
                 spot_datetime = spot_row['datetime']
-                target1 = float(ref_row['spot_target_1'])
-                target2 = float(ref_row['spot_target_2'])
 
                 if(option_type == 'CE'):
-                    # if(spot_datetime >= entry_datetime and spot_datetime <= exit_datetime):
-                    # print(str(high) + ': ' + str(target1))
                     if(high >= target1):
                         target1_datetime = spot_datetime
-
-                    if(high >= target2):
-                        target2_datetime = spot_datetime
+                        break
                 else:
-                    # if(spot_datetime >= entry_datetime and spot_datetime <= exit_datetime):
                     if(low <= target1):
                         target1_datetime = spot_datetime
+                        break
+
+            for index, spot_row in df_spot_temp.iterrows():
+
+                high = float(spot_row['high'])
+                low = float(spot_row['low'])
+                spot_datetime = spot_row['datetime']
+
+                if(option_type == 'CE'):
+                    if(high >= target2):
+                        target2_datetime = spot_datetime
+                        break
+                else:
                     if(low <= target2):
                         target2_datetime = spot_datetime
+                        break
+
             """
             df_temp = df.loc[(df['expiry'] == ref_row['expiry'])]
 
@@ -141,6 +153,7 @@ def main():
                 if(exit_signal != 0.0 and entry_price != 0.0):
                     break
             """
+
             df_opt_result = print_rec(
                 df_opt_result, strike_ref, entry_price, exit_signal, 0.0, 0.0, target1_datetime, target2_datetime)
 
